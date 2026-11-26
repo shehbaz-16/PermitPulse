@@ -1,0 +1,25 @@
+{
+  "name": "permitpulse-ontario",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PermitPulse Ontario - municipal permit lead-gen, direct-mail and local social outreach demo (Markham, Toronto and Vaughan live)",
+  "scripts": {
+    "seed": "node server/seed.js",
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node server/smoke-test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.2.17",
+    "express": "^4.21.2",
+    "htm": "^3.1.1",
+    "leaflet": "^1.9.4",
+    "pg": "^8.13.1",
+    "preact": "^10.25.4",
+    "qrcode-generator": "^2.0.4"
+  }
+}

@@ -1,0 +1,30 @@
+# Render Blueprint (render.com, free plan). In Render: New → Blueprint → pick this repo.
+# The free plan sleeps after ~15 minutes without visitors (the first visit after that takes ~30-60 s) and its disk
+# is wiped on every restart, so the database lives in a free Neon Postgres instead (set DATABASE_URL).
+services:
+  - type: web
+    name: permitpulse-ontario
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL        # Neon connection string; use sslmode=verify-full, e.g. postgresql://user:pass@ep-xxx-pooler...neon.tech/neondb?sslmode=verify-full&channel_binding=require
+        sync: false
+      - key: TEAM_PASSWORD       # protects Social Requests, Data & Sync and the demo-data switch
+        sync: false
+      - key: BUILDDATA_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: NOTIFY_EMAIL
+        sync: false
+      - key: EMAIL_OVERRIDE_TO
+        sync: false
+      - key: APP_URL             # your public URL, e.g. https://permitpulse-ontario.onrender.com
+        sync: false
