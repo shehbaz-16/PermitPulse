@@ -832,6 +832,11 @@ app.get('/shared/mapping.js', (_req, res) => res.sendFile(path.join(root, 'serve
 app.get('/vendor/preact.js', (_req, res) => res.sendFile(path.join(root, 'node_modules/htm/preact/standalone.module.js')));
 app.use('/vendor/leaflet', express.static(path.join(root, 'node_modules/leaflet/dist')));
 app.get('/vendor/qrcode.js', (_req, res) => res.sendFile(path.join(root, 'node_modules/qrcode-generator/dist/qrcode.mjs')));
+const siteUrl = (req) => (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+app.get('/robots.txt', (req, res) => res.type('text/plain').send(
+  `User-agent: *\nDisallow: /app\nDisallow: /api/\nDisallow: /offer/\n\nSitemap: ${siteUrl(req)}/sitemap.xml\n`));
+app.get('/sitemap.xml', (req, res) => res.type('application/xml').send(
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>${siteUrl(req)}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n</urlset>\n`));
 app.get('/', (_req, res) => res.sendFile(path.join(root, 'public/landing.html')));
 app.use(express.static(path.join(root, 'public'), { extensions: ['html'], index: false }));
 app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(root, 'public/index.html')));
