@@ -353,7 +353,7 @@ export const PRICING = {
     starter: { name: 'Starter Scout', monthlyCents: 14900, annualCents: 149000 }, // annual = 2 months free
     pro: { name: 'Exclusive Neighborhood Pro', monthlyCents: 39900, annualCents: 399000 },
   },
-  trialDays: 14,
+  trialDays: 30,
   impressionsPerDollar: 32,
   hstRate: 0.13,
   includedTrades: { starter: 3 }, // plans not listed here (Pro, or no plan yet) see every trade

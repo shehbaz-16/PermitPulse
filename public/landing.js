@@ -41,7 +41,7 @@ form.addEventListener('submit', async (e) => {
     if (!r.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
     form.reset();
     show({
-      live: `Thanks! We'll set up your ${cityName} demo feed and email you to book a walkthrough.`,
+      live: `Thanks! We'll set up your ${cityName} feed and email you to book a walkthrough. Your 30-day free trial starts when you're set up.`,
       addon: `Thanks! ${cityName} is a $49/month add-on on top of the 3 included cities. We'll be in touch to set it up.`,
       waitlist: `Thanks! You're #${data.position} on the ${data.city} early-access list for your service.`,
     }[kind], 'ok');

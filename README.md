@@ -67,7 +67,7 @@ The free Render plan sleeps after ~15 idle minutes, so the first visit after tha
 
 ## Pricing model (all values in `PRICING`, `server/lib/mapping.js`)
 
-- Plans: Starter Scout $149/mo (3 trades, +$29/mo per extra trade), Exclusive Neighborhood Pro $399/mo (every trade). Annual billing = 2 months free ($1,490 / $3,990 per year). Every plan starts with a 14-day free trial (card collected by Stripe, charged after the trial). Stripe Checkout accepts promotion codes, so a founding-member coupon can be created in the Stripe dashboard without code changes.
+- Plans: Starter Scout $149/mo (3 trades, +$29/mo per extra trade), Exclusive Neighborhood Pro $399/mo (every trade). Annual billing = 2 months free ($1,490 / $3,990 per year). Every plan starts with a 30-day free trial (card collected by Stripe, charged after the trial). Stripe Checkout accepts promotion codes, so a founding-member coupon can be created in the Stripe dashboard without code changes.
 - Cities: 3 included, $49/mo per extra city, $199/mo for every covered city.
 - Mail: $2.50 per permit home, $1.35 per neighbour. Social: $99 setup per campaign (Pro: 1 included per month); ad budget paid by the contractor to Meta / Nextdoor.
 - Site visits are the contractor's choice and are not a paid service: a free printable door-knock sheet (`GET /api/route-sheet`, "Door-knock sheet" in the feed) groups the selected permits by street. It warns HVAC contractors off door knocking and flags plumbing/solar/drywall, because Ontario's Consumer Protection Act (O. Reg. 17/05 s. 35.1) bans unsolicited door-to-door selling of furnaces, air conditioners, air cleaners, water heaters, water treatment and duct cleaning.

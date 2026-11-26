@@ -269,7 +269,7 @@ await t('billing: demo mode, Stripe Checkout, verify, webhook signature, Pro wai
 
   eq((await j('POST', '/api/billing/plan-checkout', { plan: 'starter', interval: 'year' })).s, 200, 'annual checkout');
   eq(lastBody.includes('[recurring][interval]=year') && lastBody.includes('[unit_amount]=149000'), true, 'annual price, 2 months free');
-  eq(lastBody.includes('subscription_data[trial_period_days]=14') && lastBody.includes('allow_promotion_codes=true'), true, '14-day trial + promo codes');
+  eq(lastBody.includes('subscription_data[trial_period_days]=30') && lastBody.includes('allow_promotion_codes=true'), true, '30-day trial + promo codes');
   const plan = await j('POST', '/api/billing/plan-checkout', { plan: 'pro' }); eq(plan.s, 200, 'plan checkout');
   const planSid = plan.d.url.split('/').pop(); eq(sessions[planSid].mode, 'subscription', 'subscription mode');
   sessions[planSid].status = 'complete';
