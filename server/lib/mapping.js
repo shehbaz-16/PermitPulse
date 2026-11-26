@@ -89,6 +89,12 @@ const TEXT_TRADES = [
   [/alarm|security|camera|smart home/i, 'security'],
   [/\bpool|hot tub|\bspa\b/i, 'pool'],
 ];
+// Basement apartments, second units, garden/laneway suites. Plain alternation only: the same string is used as a JS
+// RegExp and as a Postgres `~*` pattern, so no \b, lookarounds or other JS-only syntax.
+export const SECOND_UNIT_PATTERN = 'second(ary)? (dwelling )?(unit|suite)|accessory (apartment|dwelling)|additional (residential )?(dwelling )?unit|basement (apartment|unit|suite)|garden suite|laneway (suite|house|home)|coach house|two[ -]?(dwelling|family)?[ -]?units?|change of use to (a )?two|2nd (dwelling )?unit|in-?law (suite|apartment)';
+export const SECOND_UNIT_RE = new RegExp(SECOND_UNIT_PATTERN, 'i');
+export const LEGALIZE_RE = /legali[sz]|as-?built|w\/o permit|without (a )?permit/i;
+
 export function tradesFor(code, text = '') {
   const base = TRADES_BY_CODE[code] || [];
   if (code === 'DA') return base; // commercial / early-stage: keep the generic set

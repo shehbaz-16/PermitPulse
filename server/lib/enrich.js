@@ -4,10 +4,12 @@
 // The LLM can only restate what the permit record says. It is told not to invent anything, and it never
 // receives the street address, contractor details or any personal data.
 
+import { SECOND_UNIT_RE, LEGALIZE_RE } from './mapping.js';
+
 const WORDS = { one: 1, two: 2, three: 3, four: 4, single: 1, double: 2 };
 const TAGS = [
   [/walk.?out/i, 'Walkout basement'], [/separate (side )?entrance|side entrance/i, 'Separate entrance'],
-  [/second unit|secondary suite|accessory dwelling|basement apartment|in-?law/i, 'Second unit / suite'],
+  [SECOND_UNIT_RE, 'Second unit / suite'], [LEGALIZE_RE, 'Legalizing existing work'],
   [/underpin/i, 'Underpinning'], [/basement/i, 'Basement'], [/addition/i, 'Addition'], [/garage/i, 'Garage'],
   [/\bdeck\b/i, 'Deck'], [/porch/i, 'Porch'], [/\bpool\b/i, 'Pool'], [/kitchen/i, 'Kitchen'], [/bath(room)?\b/i, 'Bathroom'],
   [/window|door/i, 'Windows / doors'], [/roof/i, 'Roofing'], [/furnace|hvac|air.?condition|heat pump/i, 'HVAC'],

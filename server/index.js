@@ -8,7 +8,7 @@ import { runSync, borrowRelatedValues } from './sync.js';
 import { buildAlert } from './lib/alerts.js';
 import { extractFacts, llmEnrich, aiEnabled } from './lib/enrich.js';
 import { TRADES, CODES, LEAD_STATUSES, whyLead, priceCampaign, PRICING, tradeLabel, adHook, socialTargeting, SOCIAL_REQUEST_STATUSES, SOCIAL_ACCOUNT_STATUSES,
-  DOORKNOCK_BLOCKED_TRADES, DOORKNOCK_CAUTION_TRADES } from './lib/mapping.js';
+  DOORKNOCK_BLOCKED_TRADES, DOORKNOCK_CAUTION_TRADES, SECOND_UNIT_PATTERN } from './lib/mapping.js';
 import { notifyTeam, sendEmail, alertEmailHtml, emailConfigured } from './lib/notify.js';
 import { billingEnabled, billingMode, createCheckoutSession, getCheckoutSession, verifyWebhookSignature } from './lib/stripe.js';
 import { ADDON_CITY_SLUGS } from './adapters/fixtures.js';
@@ -142,6 +142,7 @@ function buildPermitQuery(q, municipalityId, contractorId, includeDemo = true, a
     else add('p.permit_code = ?', String(q.code));
   }
   if (q.status && q.status !== 'all') add('p.status = ?', String(q.status));
+  if (q.units === '1') add('(p.scope ~* ? OR p.permit_type ~* ?)', SECOND_UNIT_PATTERN);
   if (q.lead_status && q.lead_status !== 'all') add(`COALESCE(ls.status,'new') = ?`, String(q.lead_status));
   if (q.bookmarked === '1') where.push('COALESCE(ls.bookmarked,false) = true');
   if (/^\d+$/.test(q.value_min || '')) add('p.est_value >= ?', Number(q.value_min));
@@ -173,6 +174,14 @@ app.get('/api/health', wrap(async (_req, res) => {
   const db = await getDb();
   const n = (await db.query('SELECT count(*)::int AS n FROM permits')).rows[0].n;
   res.json({ ok: true, database: db.kind, permits: n });
+}));
+
+app.get('/api/second-units', wrap(async (_req, res) => {
+  const db = await getDb();
+  const rows = (await db.query(`SELECT m.city_slug, m.name, count(p.id)::int AS n
+    FROM municipalities m LEFT JOIN permits p ON p.municipality_id = m.id AND p.is_demo = false AND (p.scope ~* $1 OR p.permit_type ~* $1)
+    WHERE m.status = 'active' GROUP BY m.city_slug, m.name, m.sort_order ORDER BY m.sort_order`, [SECOND_UNIT_PATTERN])).rows;
+  res.json({ cities: rows, total: rows.reduce((s, r) => s + r.n, 0) });
 }));
 
 app.get('/api/meta', wrap(async (req, res) => {

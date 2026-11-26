@@ -97,6 +97,9 @@ export function Filters({ f, set, meta, onClear }) {
   };
   return html`<div class="filters">
     <div class="search"><${Icon} name="search" size=${17} /><input type="search" placeholder="Search street, permit #, or keyword (e.g. pool, basement)" value=${f.q} onInput=${(e) => set({ q: e.target.value })} /></div>
+    <button class=${`focus-chip ${f.units === '1' ? 'on' : ''}`} aria-pressed=${f.units === '1'} onClick=${() => set({ units: f.units === '1' ? '' : '1' })}>
+      <${Icon} name="home" size=${16} /><span><b>Basement apartments & second units</b><small>Second suites, garden and laneway suites, and owners legalizing an existing unit</small></span>
+    </button>
     <div class="trade-chips" role="group" aria-label="Filter by service">
       <button class=${`tchip ${f.trade === 'all' ? 'on' : ''}`} onClick=${() => set({ trade: 'all' })}>${ta.all ? 'All services' : 'All my services'}</button>
       ${TRADES.filter((t) => !isLocked(t.key)).map((t) => html`<button key=${t.key} class=${`tchip ${f.trade === t.key ? 'on' : ''}`} onClick=${() => set({ trade: t.key })}>${t.short}</button>`)}
@@ -123,7 +126,7 @@ export function Filters({ f, set, meta, onClear }) {
   </div>`;
 }
 
-export const DEFAULT_FILTERS = { q: '', trade: 'all', neighbourhood: 'all', code: 'all', status: 'all', from: '', to: '', sort: 'newest', value_min: 'all', value_max: 'all', has_value: '' };
+export const DEFAULT_FILTERS = { q: '', trade: 'all', neighbourhood: 'all', code: 'all', status: 'all', from: '', to: '', sort: 'newest', value_min: 'all', value_max: 'all', has_value: '', units: '' };
 
 export function ExportBar({ total, selected, onClearSel, onSelectAll, filters }) {
   const n = selected.size;
@@ -149,7 +152,7 @@ export function FeedView() {
   const [stats, setStats] = useState(null);
   const [sel, setSel] = useState(new Set());
   const [view, setView] = useLocalState('pp.feed.view', 'list');
-  const query = useMemo(() => ({ ...f, q: dq }), [f.trade, f.neighbourhood, f.code, f.status, f.from, f.to, f.sort, f.value_min, f.value_max, f.has_value, dq]);
+  const query = useMemo(() => ({ ...f, q: dq }), [f.trade, f.neighbourhood, f.code, f.status, f.from, f.to, f.sort, f.value_min, f.value_max, f.has_value, f.units, dq]);
 
   useEffect(() => { api.get('/api/stats').then(setStats).catch(() => {}); }, [tick]);
   useEffect(() => {

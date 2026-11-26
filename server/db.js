@@ -39,7 +39,24 @@ export async function migrate() {
   const sql = fs.readFileSync(path.join(root, 'server', 'schema.sql'), 'utf8');
   await d.exec(sql);
   await migrateTrades(d);
+  await migrateSecondUnits(d);
   return d;
+}
+
+// One-off: Markham "Accessory Apartment" permits were stored as Commercial. Relabel them as second suites.
+async function migrateSecondUnits(d) {
+  const done = (await d.query(`SELECT 1 FROM app_settings WHERE key='second_units_v' AND value='2'::jsonb`)).rows.length;
+  if (done) return;
+  const { tradesFor } = await import('./lib/mapping.js');
+  const re = 'accessory apartment|basement apartment|secondary suite';
+  const rows = (await d.query(`SELECT id, permit_type, scope FROM permits
+    WHERE category <> 'Secondary Suite / Basement' AND (scope ~* '${re}' OR permit_type ~* '${re}')
+      AND permit_code IN ('DA','AL')`)).rows;
+  for (const r of rows) {
+    await d.query(`UPDATE permits SET permit_code='AL', category='Secondary Suite / Basement', trades=$1::jsonb WHERE id=$2`,
+      [JSON.stringify(tradesFor('AL', `${r.permit_type} Secondary Suite / Basement ${r.scope}`)), r.id]);
+  }
+  await d.query(`INSERT INTO app_settings (key, value) VALUES ('second_units_v','2'::jsonb) ON CONFLICT (key) DO UPDATE SET value='2'::jsonb`);
 }
 
 // One-off: trades were split (hvac_electrical → hvac + electrical, plus new trades). Recompute stored permit trades from

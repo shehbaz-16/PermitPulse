@@ -6,6 +6,13 @@ const tradeSelect = form.elements.trade;
 
 tradeSelect.innerHTML = TRADES.map((t) => `<option value="${t.key}">${t.label}</option>`).join('');
 
+fetch('/api/second-units').then((r) => (r.ok ? r.json() : null)).then((d) => {
+  for (const c of d?.cities || []) {
+    const el = document.querySelector(`[data-units-city="${c.city_slug}"]`);
+    if (el) el.textContent = c.n;
+  }
+}).catch(() => {});
+
 const show = (text, kind) => { msg.textContent = text; msg.className = `form-msg ${kind}`; };
 
 form.addEventListener('submit', async (e) => {

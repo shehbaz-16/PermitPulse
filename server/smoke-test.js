@@ -94,6 +94,7 @@ await t('BuildData adapter: mock API, mapping, real-only mode', async () => {
     { results: [
       rec({ record_id: 'R4', permit_number: '25 100004', address: '300 STEELES AVE E', description: 'BACKWATER VALVE INSTALLATION', trade_canonical: 'plumbing', permit_type_canonical: 'renovation', issued_date: '2026-10-05', status_canonical: 'in_review', Estimated_Construction_Value: '14,500' }),
       rec({ record_id: 'R5', permit_number: '25 100005', address: '4750 HIGHWAY 7 E', description: 'COMMERCIAL RETAIL FIT-UP', permit_type_canonical: 'renovation', issued_date: '2026-10-01', status_canonical: 'issued' }),
+      rec({ record_id: 'R6', permit_number: '25 100006', address: '12 ELM ST', description: 'Accessory Apartment', permit_type: 'Detached House', permit_type_canonical: 'renovation', issued_date: '2026-09-28', status_canonical: 'issued' }),
     ] },
   ];
   const mock = http.createServer((req, res) => {
@@ -105,9 +106,9 @@ await t('BuildData adapter: mock API, mapping, real-only mode', async () => {
   await new Promise((r) => mock.listen(0, r));
   process.env.BUILDDATA_API_KEY = 'test-key'; process.env.BUILDDATA_BASE_URL = `http://localhost:${mock.address().port}`;
   const r = (await j('POST', '/api/sync', { source: 'builddata' })).d.results[0];
-  eq(r.mode, 'live', 'mode'); eq(r.upserted, 4, 'upserted (demolition skipped)'); eq(seen.calls, 2, 'cursor pages'); eq(seen.keys.every((k) => k === 'test-key'), true, 'api key header');
+  eq(r.mode, 'live', 'mode'); eq(r.upserted, 5, 'upserted (demolition skipped)'); eq(seen.calls, 2, 'cursor pages'); eq(seen.keys.every((k) => k === 'test-key'), true, 'api key header');
   const all = (await j('GET', '/api/permits')).d.items;
-  eq(all.length, 4, 'demo hidden after first live sync'); eq(all.every((p) => p.is_demo === false), true, 'is_demo false');
+  eq(all.length, 5, 'demo hidden after first live sync'); eq(all.every((p) => p.is_demo === false), true, 'is_demo false');
   const pool = all.find((p) => p.source_id === 'R1');
   eq(pool.address, '178 Main St Unionville', 'title-case address'); eq(pool.permit_code, 'PE', 'pool → PE'); eq(pool.postal_fsa, 'L3R', 'fsa'); eq(pool.est_value, 85000, '$ string value'); eq(pool.lat, 43.8566, 'lat'); eq(pool.lng, -79.3119, 'lng string → number');
   eq(all.find((p) => p.source_id === 'R2').est_value, 64000, 'cents → dollars'); eq(all.find((p) => p.source_id === 'R4').est_value, 14500, 'oddly named value key'); eq(all.find((p) => p.source_id === 'R5').lat, null, 'missing coords stay null');
@@ -116,16 +117,20 @@ await t('BuildData adapter: mock API, mapping, real-only mode', async () => {
   eq(all.find((p) => p.source_id === 'R2').category, 'Secondary Suite / Basement', 'basement category');
   eq(all.find((p) => p.source_id === 'R4').permit_code, 'PP', 'plumbing → PP');
   eq(all.find((p) => p.source_id === 'R5').permit_code, 'DA', 'commercial → DA');
+  eq(all.find((p) => p.source_id === 'R6').category, 'Secondary Suite / Basement', 'Markham accessory apartment → second suite, not commercial');
+  eq((await j('GET', '/api/permits?units=1')).d.items.map((p) => p.source_id).sort().join(), 'R2,R6', 'second-units filter');
+  eq((await j('GET', '/api/second-units')).d.cities.find((c) => c.city_slug === 'markham').n, 2, 'second-unit counts');
+  eq(all.find((p) => p.source_id === 'R6').facts.tags.includes('Second unit / suite'), true, 'second-unit tag');
   eq((await j('PUT', '/api/settings', { showDemo: true })).d.showDemo, true, 'toggle');
   const demoRow = (await j('GET', '/api/permits?q=26-114892')).d.items[0]; eq(demoRow.lat > 43.8 && demoRow.lat < 43.95, true, 'demo permit has approximate coordinates');
-  eq((await j('GET', '/api/permits')).d.total, 24, 'demo + real');
+  eq((await j('GET', '/api/permits')).d.total, 25, 'demo + real');
   await j('PUT', '/api/settings', { showDemo: false });
   mock.close(); delete process.env.BUILDDATA_API_KEY; delete process.env.BUILDDATA_BASE_URL;
 });
 await t('BuildData failure falls back without wiping real data', async () => {
   process.env.BUILDDATA_API_KEY = 'bad'; process.env.BUILDDATA_BASE_URL = 'http://localhost:1';
   const r = (await j('POST', '/api/sync', { source: 'builddata' })).d.results[0];
-  eq(r.mode, 'fallback', 'mode'); eq((await j('GET', '/api/permits')).d.total, 4, 'real records kept');
+  eq(r.mode, 'fallback', 'mode'); eq((await j('GET', '/api/permits')).d.total, 5, 'real records kept');
   delete process.env.BUILDDATA_API_KEY; delete process.env.BUILDDATA_BASE_URL;
 });
 
@@ -142,7 +147,7 @@ await t('value filter: min / max / only-with-value', async () => {
   eq((await j('GET', '/api/permits?value_min=50000')).d.total, 2, 'min count');
   eq((await j('GET', '/api/permits?value_max=20000')).d.total, 1, 'max count');
   eq((await j('GET', '/api/permits?has_value=1')).d.total, 3, 'has value');
-  eq((await j('GET', '/api/permits?value_min=abc')).d.total, 4, 'junk ignored');
+  eq((await j('GET', '/api/permits?value_min=abc')).d.total, 5, 'junk ignored');
   eq((await fetch(base + '/api/permits.csv?value_min=50000').then((r) => r.text())).trim().split(/\r?\n/).length, 3, 'csv honours filter');
 });
 await t('extracted facts + record details', async () => {

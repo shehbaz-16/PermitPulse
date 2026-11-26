@@ -116,6 +116,7 @@ const ICONS = {
   x: '<path d="M18 6 6 18M6 6l12 12"/>',
   download: '<path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16"/>',
   zap: '<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
+  home: '<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
   shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
   pulse: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
   database: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',

@@ -6,7 +6,7 @@
 //   BUILDDATA_PAGE_SIZE=100          rows per call (free keys are capped lower)
 //   BUILDDATA_BASE_URL               override for tests
 // Only an allowlist of fields is read. contractor_phone / contractor_address / contact_role are never touched.
-import { tradesFor } from '../lib/mapping.js';
+import { tradesFor, SECOND_UNIT_RE } from '../lib/mapping.js';
 
 const env = (k, d) => process.env[k] || d;
 
@@ -89,13 +89,14 @@ export function mapRecord(r) {
 
   let code, category;
   if (canon === 'demolition' && !/NEW|REPLACE|INFILL/.test(text)) return null;
-  if (/COMMERCIAL|INDUSTRIAL|OFFICE|RETAIL|INSTITUTION|WAREHOUSE|MIXED.?USE|APARTMENT/.test(text)) { code = 'DA'; category = 'Commercial / Development Application'; }
+  if (/ACCESSORY APARTMENT|BASEMENT APARTMENT|SECONDARY SUITE/.test(text)) { code = 'AL'; category = 'Secondary Suite / Basement'; }
+  else if (/COMMERCIAL|INDUSTRIAL|OFFICE|RETAIL|INSTITUTION|WAREHOUSE|MIXED.?USE|APARTMENT/.test(text)) { code = 'DA'; category = 'Commercial / Development Application'; }
   else if (/\bPOOL\b/.test(text)) { code = 'PE'; category = 'Pool / Deck'; }
   else if (/TREE/.test(text)) { code = 'TP'; category = 'Tree Removal'; }
   else if (trade === 'plumbing' || /BACKWATER|SEWER|WATER SERVICE|WEEPING|DRAIN|PLUMB/.test(text)) { code = 'PP'; category = 'Plumbing / Drainage'; }
   else if (trade === 'mechanical' || trade === 'electrical' || trade === 'gas' || /HVAC|FURNACE|HEATING|AIR.?CONDITION|MECHANICAL|ELECTRIC/.test(text)) { code = 'HV'; category = 'HVAC / Mechanical'; }
   else if (canon === 'new_construction' && /DWELLING|HOUSE|SEMI|TOWNHOUSE|DETACHED|SINGLE/.test(text)) { code = /REPLACE|INFILL|DEMOLI/.test(text) ? 'RP' : 'HP'; category = code === 'RP' ? 'Residential Renovation' : 'New Home'; }
-  else if (/BASEMENT|SECOND UNIT|SECONDARY SUITE|ACCESSORY DWELLING|IN-?LAW/.test(text)) { code = 'AL'; category = 'Secondary Suite / Basement'; }
+  else if (/BASEMENT/.test(text) || SECOND_UNIT_RE.test(text)) { code = 'AL'; category = 'Secondary Suite / Basement'; }
   else if (/\bDECK\b|PORCH|GAZEBO|PERGOLA|CABANA/.test(text)) { code = 'AL'; category = 'Pool / Deck'; }
   else { code = 'AL'; category = 'Residential Renovation'; }
 
